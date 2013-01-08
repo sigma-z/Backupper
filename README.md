@@ -2,15 +2,17 @@ Backupper
 ===
 
 Backupper is a in PHP (requires PHP 5.3 or greater) written command line tool for backup folders.
-It's only tested on Microsoft Windows 7, until now.
+It's only tested on Microsoft Windows, until now.
 
 [On GitHub]: https://github.com/sigma-z/Backupper
 
 How to use
 ---
 
-1. You copy the file './config/default.php.dist' to './config/default.php' and open it in a text editor.
-2. You configure your backup:
+### 1. Create back config
+ * You copy the file './config/default.php.dist' to './config/default.php' and open it in a text editor.
+
+### 2. Configure your backup
  * You can have more than one source for your backup - use / as or directory separator.
  * You specify the target folder. You can use %date% and %mode% as placeholders in your target folder.
   * %date% will be replace by date('Y-m-d')
@@ -18,11 +20,12 @@ How to use
  * You may specify global exclusions of file names or directory names and/or you may specify exclusions for each source separately.
  * You may specify exclusion for absolute file paths - use / as or directory separator.
 
-3. Run the backup tool...
+### 3. Run the backup tool
 
     php backupper.php [name=<backup name>] [mode=full|differential|incremental]
 
 If you have not specified the argument 'name' it uses 'default' as backup name.
+
 If you have not specified the argument 'mode' it uses 'full' as backup mode.
 
 Features
