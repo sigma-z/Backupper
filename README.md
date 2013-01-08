@@ -13,12 +13,13 @@ How to use
 2. You configure your backup:
  * You can have more than one source for your backup - use / as or directory separator.
  * You specify the target folder. You can use %date% and %mode% as placeholders in your target folder.
-   * %date% will be replace by date('Y-m-d')
-   * %mode% will be replace the given backup mode (see below)
+  * %date% will be replace by date('Y-m-d')
+  * %mode% will be replace the given backup mode (see below)
  * You may specify global exclusions of file names or directory names and/or you may specify exclusions for each source separately.
  * You may specify exclusion for absolute file paths - use / as or directory separator.
 
 3. Run the backup tool...
+
     php backupper.php [name=<backup name>] [mode=full|differential|incremental]
 
 If you have not specified the argument 'name' it uses 'default' as backup name.
