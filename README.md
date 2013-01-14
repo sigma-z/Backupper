@@ -4,6 +4,8 @@ Backupper
 Backupper is a in PHP (requires PHP 5.3 or greater) written command line tool for backup folders.
 It's only tested on Microsoft Windows, until now.
 
+For file access reasons you should run the script as __administrator / root__.
+
 [On GitHub]: https://github.com/sigma-z/Backupper
 
 How to use
