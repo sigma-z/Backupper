@@ -38,6 +38,7 @@ if (empty($config['sources'])) {
     exit;
 }
 
+mkdir(__DIR__ . '/data', '0777');
 $lastBackupDataFile = __DIR__ . '/data/' . $backupName . '.ser';
 $lastBackups = getLastBackupTimestamps($lastBackupDataFile);
 
