@@ -36,11 +36,16 @@ class FileIterator implements \Iterator
      * @var array
      */
     private $excludePaths = array();
+    /**
+     * @var int
+     */
+    private $maxDepth = 0;
 
 
-    public function __construct($folder)
+    public function __construct($folder, $maxDepth = 0)
     {
         $this->currentIterator = new \DirectoryIterator($folder);
+        $this->maxDepth = $maxDepth;
     }
 
 
@@ -138,6 +143,7 @@ class FileIterator implements \Iterator
         }
         else if (!empty($this->pathStack)) {
             $this->dirUp();
+            return $this->valid();
         }
         return $this->currentIterator->valid();
     }
@@ -178,7 +184,7 @@ class FileIterator implements \Iterator
     {
         /** @var \SplFileInfo $current */
         $current = $this->currentIterator->current();
-        if ($current->isDir()) {
+        if ($current->isDir() && ($this->maxDepth > 0 && count($this->pathStack) + 1 < $this->maxDepth)) {
             $this->pathStack[] = $this->currentIterator;
             $this->currentIterator = new \DirectoryIterator($current->getPathname());
             return true;
