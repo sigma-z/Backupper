@@ -184,7 +184,7 @@ class FileIterator implements \Iterator
     {
         /** @var \SplFileInfo $current */
         $current = $this->currentIterator->current();
-        if ($current->isDir() && ($this->maxDepth > 0 && count($this->pathStack) + 1 < $this->maxDepth)) {
+        if ($current->isDir() && ($this->maxDepth == 0 || count($this->pathStack) + 1 < $this->maxDepth)) {
             $this->pathStack[] = $this->currentIterator;
             $this->currentIterator = new \DirectoryIterator($current->getPathname());
             return true;
