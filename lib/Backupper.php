@@ -103,23 +103,20 @@ class Backupper
         $source = rtrim(realpath($source), DIRECTORY_SEPARATOR);
         $target = $this->getTargetFolder($target);
 
+        if (!is_dir($target)) {
+            mkdir($target, 0777, true);
+        }
+
         $fileIterator = new \File\FileIterator($source);
         $fileIterator->setExcludeNames($this->excludeNames);
         $fileIterator->setExcludePaths($this->excludePaths);
 
-        if (!is_dir($target)) {
-            mkdir($target, 0777, true);
-        }
         $startTime = microtime(true);
         $i = 0;
         $writtenBytes = 0;
 
         /** @var SplFileInfo $item */
         foreach ($fileIterator as $item) {
-            $file = $item->getPathname();
-            $relativeFile = trim(substr($file, strlen($source)), DIRECTORY_SEPARATOR);
-            $targetFile = $target . '/' . $relativeFile;
-
             if ($this->mode != self::MODE_FULL && !$this->fileChanged($item)) {
                 continue;
             }
@@ -127,6 +124,9 @@ class Backupper
                 continue;
             }
 
+            $file = $item->getPathname();
+            $relativeFile = trim(substr($file, strlen($source)), DIRECTORY_SEPARATOR);
+            $targetFile = $target . '/' . $relativeFile;
             if (is_file($targetFile)) {
                 $targetFileInfo = new \SplFileInfo($targetFile);
                 if ($item->getMTime() <= $targetFileInfo->getMTime()) {
@@ -143,22 +143,25 @@ class Backupper
                 $createdFolders[$path] = true;
             }
             try {
-                $bufferedCopy = new \File\BufferedCopy($item->getPathname(), $targetFile);
+                $shortFileName = strlen($relativeFile) > 36
+                    ? substr($relativeFile, 0, 17) . '...' . substr($relativeFile, -17)
+                    : $relativeFile;
 
+                $bufferedCopy = new \File\BufferedCopy($item->getPathname(), $targetFile);
                 while (($size = $bufferedCopy->copyBuffered())) {
                     $i++;
                     $writtenBytes += $size;
                     if ($i % 200 == 0) {
                         $endTime = microtime(true);
-                        $col1 = sprintf("%.1f", $this->megaBytes) . ' MBytes';
-                        $col2 = sprintf("%.2f", (($writtenBytes / ($endTime - $startTime)) / 1024)) . ' kBytes/s';
+                        $col1 = sprintf("%.1f", $this->megaBytes) . ' MB';
+                        $col2 = sprintf("%.2f", (($writtenBytes / ($endTime - $startTime)) / 1024)) . ' kB/s';
                         $col3 = $timer->getElapsedHumanReadable();
-                        $col1 .= str_repeat(' ', 20 - strlen($col1));
-                        $col2 .= str_repeat(' ', 20 - strlen($col2));
-                        $col3 .= str_repeat(' ', 16 - strlen($col3));
-                        $col4 = $file . str_repeat("\t", 10);
-
-                        echo "\r$col1 $col2 $col3 $col4";
+                        $col1 .= str_repeat(' ', 12 - strlen($col1));
+                        $col2 .= str_repeat(' ', 16 - strlen($col2));
+                        $col3 .= str_repeat(' ', 10 - strlen($col3));
+                        $col4 = $shortFileName;
+                        echo "\r";
+                        echo "$col1 $col2 $col3 $col4";
                         $writtenBytes = 0;
                         $startTime = $endTime;
                     }
