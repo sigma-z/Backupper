@@ -39,7 +39,7 @@ class Backupper
         if (!in_array($mode, self::$supportedModes)) {
             $mode = self::MODE_FULL;
         }
-        $this->lastBackup = $this->getLastBackupDate($lastBackups);
+        $this->lastBackup = $this->getLastBackupDate($mode, $lastBackups);
         if (empty($this->lastBackup)) {
             $mode = self::MODE_FULL;
         }
@@ -47,11 +47,11 @@ class Backupper
     }
 
 
-    private function getLastBackupDate(array $lastBackups)
+    private function getLastBackupDate($mode, array $lastBackups)
     {
         $lastBackup = '';
 
-        switch ($this->mode) {
+        switch ($mode) {
             case self::MODE_DIFFERENTIAL:
                 if (isset($lastBackups[self::MODE_FULL])) {
                     $lastBackup = $lastBackups[self::MODE_FULL];
@@ -142,6 +142,7 @@ class Backupper
                 }
                 $createdFolders[$path] = true;
             }
+            $currentFileWrittenSize = 0;
             try {
                 $shortFileName = strlen($relativeFile) > 36
                     ? substr($relativeFile, 0, 17) . '...' . substr($relativeFile, -17)
@@ -151,10 +152,12 @@ class Backupper
                 while (($size = $bufferedCopy->copyBuffered())) {
                     $i++;
                     $writtenBytes += $size;
+                    $currentFileWrittenSize += $size;
+                    $this->megaBytes += ($size / (1024 * 1024));
                     if ($i % 200 == 0) {
                         $endTime = microtime(true);
-                        $col1 = sprintf("%.1f", $this->megaBytes) . ' MB';
-                        $col2 = sprintf("%.2f", (($writtenBytes / ($endTime - $startTime)) / 1024)) . ' kB/s';
+                        $col1 = sprintf("%.1f", $this->megaBytes) . 'MB';
+                        $col2 = sprintf("%.2f", (($writtenBytes / ($endTime - $startTime)) / 1024)) . 'kB/s';
                         $col3 = $timer->getElapsedHumanReadable();
                         $col1 .= str_repeat(' ', 12 - strlen($col1));
                         $col2 .= str_repeat(' ', 16 - strlen($col2));
@@ -168,10 +171,9 @@ class Backupper
                 }
             }
             catch (\Exception $e) {
+                $this->megaBytes -= $currentFileWrittenSize;
                 continue;
             }
-            $size = $item->getSize();
-            $this->megaBytes += ($size / (1024 * 1024));
         }
     }
 

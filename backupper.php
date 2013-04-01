@@ -38,7 +38,9 @@ if (empty($config['sources'])) {
     exit;
 }
 
-mkdir(__DIR__ . '/data', '0777');
+if (!is_dir(__DIR__ . '/data')) {
+    mkdir(__DIR__ . '/data', '0777');
+}
 $lastBackupDataFile = __DIR__ . '/data/' . $backupName . '.ser';
 $lastBackups = getLastBackupTimestamps($lastBackupDataFile);
 
@@ -58,7 +60,8 @@ foreach ($config['sources'] as $source => $backupData) {
 
     $excludePaths = isset($backupData['excludePaths']) ? $backupData['excludePaths'] : array();
 
-    $backupper = new \Backupper($mode, $lastBackups);
+    $lastBackupsForSource = isset($lastBackups[$source]) ? $lastBackups[$source] : array();
+    $backupper = new \Backupper($mode, $lastBackupsForSource);
     $backupper->setExcludes($excludeNames, $excludePaths);
     $timer = $backupper->getTimer();
 
